@@ -60,6 +60,9 @@
 
         <source-file src="src/android/parse/Parse-1.13.0.jar" target-dir="libs" framework="true" />
         <source-file src="src/android/parse/bolts-tasks-1.4.0.jar" target-dir="libs" framework="true" />
+        <source-file src="src/android/parse/ParseFacebookUtilsV4-1.10.4.jar" target-dir="libs" framework="true" />
+        <source-file src="src/android/parse/ParseInterceptors-0.0.2.jar" target-dir="libs" framework="true" />
+        <source-file src="src/android/parse/ParseTwitterUtils-1.10.5.jar" target-dir="libs" framework="true" />
         <source-file src="src/android/ParsePlugin.java" target-dir="src/org/apache/cordova/core" />
         <source-file src="src/android/ParsePluginReceiver.java" target-dir="src/org/apache/cordova/core" />
 
@@ -97,6 +100,9 @@
 
         <framework src="src/ios/Frameworks/Bolts.framework" custom="true" />
         <framework src="src/ios/Frameworks/Parse.framework" custom="true" />
+        <framework src="src/ios/Frameworks/ParseFacebookUtilsV4.framework" custom="true" />
+        <framework src="src/ios/Frameworks/ParseTwitterUtils.framework" custom="true" />
+        <framework src="src/ios/Frameworks/ParseUI.framework" custom="true" />
     </platform>
 
 
