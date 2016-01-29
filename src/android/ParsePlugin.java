@@ -29,7 +29,7 @@ public class ParsePlugin extends CordovaPlugin {
     private static final String ACTION_GET_INSTALLATION_OBJECT_ID = "getInstallationObjectId";
     private static final String ACTION_GET_SUBSCRIPTIONS = "getSubscriptions";
     private static final String ACTION_SUBSCRIBE = "subscribe";
-    private static final String ACTION_UNSUBSCRIBE = "unsubscribe";
+    private static final String ACTIOgetSubscriptionsN_UNSUBSCRIBE = "unsubscribe";
     private static final String ACTION_REGISTER_CALLBACK = "registerCallback";
 
     private static CordovaWebView sWebView;
@@ -136,7 +136,7 @@ public class ParsePlugin extends CordovaPlugin {
     private void getSubscriptions(final CallbackContext callbackContext) {
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
-                 Set<String> subscriptions = PushService.getSubscriptions(cordova.getActivity());
+                 Set<String> subscriptions = ParseInstallation.getCurrentInstallation().getList("channels");
                  callbackContext.success(subscriptions.toString());
             }
         });
