@@ -4,6 +4,7 @@ import android.app.Application;
 import android.util.Log;
 
 import java.util.Set;
+import java.util.List;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -22,21 +23,21 @@ import com.parse.ParsePush;
 import android.util.Log;
 
 public class ParsePlugin extends CordovaPlugin {
-
+    
     private static final String TAG = "ParsePlugin";
     private static final String ACTION_INITIALIZE = "initialize";
     private static final String ACTION_GET_INSTALLATION_ID = "getInstallationId";
     private static final String ACTION_GET_INSTALLATION_OBJECT_ID = "getInstallationObjectId";
     private static final String ACTION_GET_SUBSCRIPTIONS = "getSubscriptions";
     private static final String ACTION_SUBSCRIBE = "subscribe";
-    private static final String ACTIOgetSubscriptionsN_UNSUBSCRIBE = "unsubscribe";
+    private static final String ACTION_UNSUBSCRIBE = "unsubscribe";
     private static final String ACTION_REGISTER_CALLBACK = "registerCallback";
-
+    
     private static CordovaWebView sWebView;
     private static String sEventCallback = null;
     private static boolean sForeground = false;
     private static JSONObject sLaunchNotification = null;
-
+    
     public static void initializeParseWithApplication(Application app) {
         String appId = getStringByKey(app, "parse_app_id");
         String clientKey = getStringByKey(app, "parse_client_key");
@@ -44,12 +45,12 @@ public class ParsePlugin extends CordovaPlugin {
         Log.d(TAG, "Initializing with parse_app_id: " + appId + " and parse_client_key:" + clientKey);
         Parse.initialize(app, appId, clientKey);
     }
-
+    
     private static String getStringByKey(Application app, String key) {
         int resourceId = app.getResources().getIdentifier(key, "string", app.getPackageName());
         return app.getString(resourceId);
     }
-
+    
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals(ACTION_REGISTER_CALLBACK)) {
@@ -64,7 +65,7 @@ public class ParsePlugin extends CordovaPlugin {
             this.getInstallationId(callbackContext);
             return true;
         }
-
+        
         if (action.equals(ACTION_GET_INSTALLATION_OBJECT_ID)) {
             this.getInstallationObjectId(callbackContext);
             return true;
@@ -83,7 +84,7 @@ public class ParsePlugin extends CordovaPlugin {
         }
         return false;
     }
-
+    
     private void registerCallback(final CallbackContext callbackContext, final JSONArray args) {
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
@@ -98,7 +99,7 @@ public class ParsePlugin extends CordovaPlugin {
             }
         });
     }
-
+    
     private void initialize(final CallbackContext callbackContext, final JSONArray args) {
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
@@ -114,7 +115,7 @@ public class ParsePlugin extends CordovaPlugin {
             }
         });
     }
-
+    
     private void getInstallationId(final CallbackContext callbackContext) {
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
@@ -123,7 +124,7 @@ public class ParsePlugin extends CordovaPlugin {
             }
         });
     }
-
+    
     private void getInstallationObjectId(final CallbackContext callbackContext) {
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
@@ -132,16 +133,16 @@ public class ParsePlugin extends CordovaPlugin {
             }
         });
     }
-
+    
     private void getSubscriptions(final CallbackContext callbackContext) {
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
-                 Set<String> subscriptions = ParseInstallation.getCurrentInstallation().getList("channels");
-                 callbackContext.success(subscriptions.toString());
+                List<String> subscriptions = ParseInstallation.getCurrentInstallation().getList("channels");
+                callbackContext.success(subscriptions.toString());
             }
         });
     }
-
+    
     private void subscribe(final String channel, final CallbackContext callbackContext) {
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
@@ -150,7 +151,7 @@ public class ParsePlugin extends CordovaPlugin {
             }
         });
     }
-
+    
     private void unsubscribe(final String channel, final CallbackContext callbackContext) {
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
@@ -159,10 +160,10 @@ public class ParsePlugin extends CordovaPlugin {
             }
         });
     }
-
+    
     /*
-    * Use the cordova bridge to call the jsCB and pass it jsonPayload as param
-    */
+     * Use the cordova bridge to call the jsCB and pass it jsonPayload as param
+     */
     public static void javascriptEventCallback(JSONObject jsonPayload) {
         if (sEventCallback != null && !sEventCallback.isEmpty() && sWebView != null) {
             String snippet = "javascript:" + sEventCallback + "(" + jsonPayload.toString() + ")";
@@ -170,7 +171,7 @@ public class ParsePlugin extends CordovaPlugin {
             sWebView.sendJavascript(snippet);
         }
     }
-
+    
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
@@ -178,7 +179,7 @@ public class ParsePlugin extends CordovaPlugin {
         sWebView = this.webView;
         sForeground = true;
     }
-
+    
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -186,27 +187,27 @@ public class ParsePlugin extends CordovaPlugin {
         sWebView = null;
         sForeground = false;
     }
-
+    
     @Override
     public void onPause(boolean multitasking) {
         super.onPause(multitasking);
         sForeground = false;
     }
-
+    
     @Override
     public void onResume(boolean multitasking) {
         super.onResume(multitasking);
         sForeground = true;
     }
-
+    
     public static boolean isInForeground() {
         return sForeground;
     }
-
+    
     public static void setLaunchNotification(JSONObject jsonPayload) {
         sLaunchNotification = jsonPayload;
     }
-
+    
     private void handleLaunchNotification() {
         if (isInForeground() && sLaunchNotification != null) {
             javascriptEventCallback(sLaunchNotification);
