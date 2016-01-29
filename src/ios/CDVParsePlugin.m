@@ -57,10 +57,18 @@ static NSString * const PPReceivedInForeground = @"receivedInForeground";
 
         NSString *appId = [command.arguments objectAtIndex:0];
         NSString *clientKey = [command.arguments objectAtIndex:1];
+        NSString *server = [command.arguments objectAtIndex:2];
         [[NSUserDefaults standardUserDefaults] setObject:appId forKey:PPAppId];
         [[NSUserDefaults standardUserDefaults] setObject:clientKey forKey:PPClientKey];
+        [[NSUserDefaults standardUserDefaults] setObject:server forKey:PPServer];
 
-        [Parse setApplicationId:appId clientKey:clientKey];
+        // [Parse setApplicationId:appId clientKey:clientKey];
+        
+        [Parse initializeWithConfiguration:[ParseClientConfiguration configurationWithBlock:^(id<ParseMutableClientConfiguration> configuration) {
+           configuration.applicationId = appId;
+           configuration.clientKey = clientKey;
+           configuration.server = server;
+        }]];
 
         // Register for notifications
         if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)]) {
@@ -222,9 +230,16 @@ void MethodSwizzle(Class c, SEL originalSelector) {
 
     NSString *appId = [[NSUserDefaults standardUserDefaults] stringForKey:PPAppId];
     NSString *clientKey = [[NSUserDefaults standardUserDefaults] stringForKey:PPClientKey];
+    NSString *server = [[NSUserDefaults standardUserDefaults] stringForKey:PPServer];
 
     if (appId && clientKey) {
-        [Parse setApplicationId:appId clientKey:clientKey];
+        // [Parse setApplicationId:appId clientKey:clientKey];
+        
+        [Parse initializeWithConfiguration:[ParseClientConfiguration configurationWithBlock:^(id<ParseMutableClientConfiguration> configuration) {
+           configuration.applicationId = appId;
+           configuration.clientKey = clientKey;
+           configuration.server = server;
+        }]];
     }
 
     NSDictionary *launchPayload = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
