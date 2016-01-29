@@ -8,6 +8,7 @@ static NSString * ecb = nil;
 static NSMutableDictionary * launchNotification = nil;
 static NSString * const PPAppId = @"appId";
 static NSString * const PPClientKey = @"clientKey";
+static NSString * const PPServer = @"server";
 static NSString * const PPReceivedInForeground = @"receivedInForeground";
 
 @implementation CDVParsePlugin
