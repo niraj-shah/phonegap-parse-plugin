@@ -11,13 +11,23 @@ var parsePlugin = {
     },
 
     initialize: function(appId, clientKey, server, successCallback, errorCallback) {
-        cordova.exec(
-            successCallback,
-            errorCallback,
-            'ParsePlugin',
-            'initialize',
-            [appId, clientKey, server]
-        );
+        if ( typeof server !== 'function' ) {
+          cordova.exec(
+              successCallback,
+              errorCallback,
+              'ParsePlugin',
+              'initialize',
+              [appId, clientKey, server]
+          );
+        } else {
+          cordova.exec(
+              server,
+              successCallback,
+              'ParsePlugin',
+              'initialize',
+              [appId, clientKey]
+          );
+        }
     },
 
     getInstallationId: function(successCallback, errorCallback) {

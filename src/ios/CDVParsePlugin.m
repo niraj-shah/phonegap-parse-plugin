@@ -58,7 +58,14 @@ static NSString * const PPReceivedInForeground = @"receivedInForeground";
 
         NSString *appId = [command.arguments objectAtIndex:0];
         NSString *clientKey = [command.arguments objectAtIndex:1];
-        NSString *server = [command.arguments objectAtIndex:2];
+        NSString *server = nil;
+        
+        if ( [command.arguments count] == 2 ) {
+            server = @"https://api.parse.com/1/";
+        } else {
+            server = [command.arguments objectAtIndex:2];
+        }
+        
         [[NSUserDefaults standardUserDefaults] setObject:appId forKey:PPAppId];
         [[NSUserDefaults standardUserDefaults] setObject:clientKey forKey:PPClientKey];
         [[NSUserDefaults standardUserDefaults] setObject:server forKey:PPServer];
