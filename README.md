@@ -1,9 +1,13 @@
-Phonegap Parse.com Plugin
+Cordova / PhoneGap Parse.com Plugin
 =========================
 
-Phonegap/Cordova 3.0+ plugin for Parse.com push service
+Cordova / PhoneGap 5.0+ plugin for Parse.com. Updated to support [Open Source ParseServer](https://github.com/ParsePlatform/parse-server/).
 
-Using [Parse.com's](http://parse.com) REST API for push requires the installation id, which isn't available in JS
+Uses:
+- Parse Android SDK v1.13.0
+- Parse iOS SDK v1.12.0
+
+Using [Parse.com's](http://parse.com) REST API for Push requires the Installation ID, which isn't available in JS
 
 This plugin exposes native API push services to JS:
 * <a href="https://www.parse.com/docs/android/api/com/parse/ParseInstallation.html#getInstallationId()">getInstallationId</a>
@@ -22,18 +26,53 @@ Installation
 Pick one of these two commands:
 
 ```
-phonegap local plugin add https://github.com/grrrian/phonegap-parse-plugin --variable APP_ID=PARSE_APP_ID --variable CLIENT_KEY=PARSE_CLIENT_KEY
-cordova plugin add https://github.com/grrrian/phonegap-parse-plugin --variable APP_ID=PARSE_APP_ID --variable CLIENT_KEY=PARSE_CLIENT_KEY
+phonegap local plugin add https://github.com/niraj-shah/phonegap-parse-plugin --variable APP_ID=PARSE_APP_ID --variable CLIENT_KEY=PARSE_CLIENT_KEY
+cordova plugin add https://github.com/niraj-shah/phonegap-parse-plugin --variable APP_ID=PARSE_APP_ID --variable CLIENT_KEY=PARSE_CLIENT_KEY
 ```
 
-Initial Setup
+If you want to use your own backend Parse server, run the following commands instead:
+  
+```
+phonegap local plugin add https://github.com/niraj-shah/phonegap-parse-plugin --variable APP_ID=PARSE_APP_ID --variable CLIENT_KEY=PARSE_CLIENT_KEY --variable SERVER=https://your-server.com/app
+cordova plugin add https://github.com/niraj-shah/phonegap-parse-plugin --variable APP_ID=PARSE_APP_ID --variable CLIENT_KEY=PARSE_CLIENT_KEY --variable SERVER=https://your-server.com/app
+```
+
+Remember to point the ```SERVER``` to the location of your Open Source Parse Server. If the ```SERVER``` is not specified, the plugin will detault to Parse.com.
+
+Initializing
 -------------
 
 A parsePlugin variable is defined globally (e.g. $window.parsePlugin).
 
-Once the device is ready (see: http://docs.phonegap.com/en/4.0.0/cordova_events_events.md.html#deviceready), call ```parsePlugin.initialize()```. This will register the device with Parse, you should see this reflected in your Parse control panel. After this runs you probably want to save the installationID somewhere, and perhaps subscribe the user to a few channels. Here is a contrived example.
+Once the device is ready (see: http://docs.phonegap.com/en/4.0.0/cordova_events_events.md.html#deviceready), call ```parsePlugin.initialize()```. This will register the device with Parse, you should see this reflected in your Parse control panel. After this runs you probably want to save the installationID somewhere, and perhaps subscribe the user to a few channels.
 
 (Note: When using Windows Phone, clientKey must be your .NET client key from Parse. So you will need to set this based on platform i.e. if( window.device.platform == "Win32NT"))
+
+To initialize the plugin, and register the device with Parse, you can call:
+
+```
+parsePlugin.initialize( appId, clientKey, function( data ) {
+  // ...
+}, function(e) {
+	alert('error');
+});
+```
+
+If you are using the Open Source Parse Server, the third parameter can be set to your Server URL instead:
+
+```
+parsePlugin.initialize( appId, clientKey, serverUrl, function( data ) {
+  // ...
+}, function(e) {
+	alert('error');
+});
+```
+
+
+Initial Setup
+-------------
+
+An example of subscribing the user to a Channel is shown below:
 
 ```
 parsePlugin.initialize(appId, clientKey, function() {
@@ -109,42 +148,56 @@ Usage
 -----
 ```
 <script type="text/javascript">
+    // when using parse.com
 	parsePlugin.initialize(appId, clientKey, function() {
 		alert('success');
 	}, function(e) {
 		alert('error');
 	});
-
+	
+	// when using open source parse server
+	parsePlugin.initialize(appId, clientKey, serverUrl, function() {
+		alert('success');
+	}, function(e) {
+		alert('error');
+	});
+  
+    // get installation ID
 	parsePlugin.getInstallationId(function(id) {
 		alert(id);
 	}, function(e) {
 		alert('error');
 	});
 
+    // get user's subscribed channels
 	parsePlugin.getSubscriptions(function(subscriptions) {
 		alert(subscriptions);
 	}, function(e) {
 		alert('error');
 	});
 
+    // subscribe user to a channel
 	parsePlugin.subscribe('SampleChannel', function() {
 		alert('OK');
 	}, function(e) {
 		alert('error');
 	});
 
+    // unsubscribe user from a channel
 	parsePlugin.unsubscribe('SampleChannel', function(msg) {
 		alert('OK');
 	}, function(e) {
 		alert('error');
 	});
 
+    // reset iOS badge count
 	parsePlugin.resetBadge(function() {
     alert('OK');
   }, function(e) {
     alert('error');
   });
 
+    // track event
 	parsePlugin.trackEvent(function(name, dimensions) {
     alert('OK');
   }, function(e) {
@@ -160,7 +213,7 @@ Quirks
 
 Parse needs to be initialized once in the `onCreate` method of your application class using the `initializeParseWithApplication` method.
 
-If you don’t have an application class (which is most likely the case for a Cordova app), you can create one using this template:
+If you don’t have an application class (```App.java```, found in the ```platforms/android/src/my/package/namespace``` folder), you can create one using this template:
 
 ```java
 package my.package.namespace;
@@ -179,15 +232,17 @@ public class App extends Application {
 }
 ```
 
-And add your application name to `AndroidManifest.xml`:
+And add your application name to `AndroidManifest.xml` in the ```<application>``` tag:
 
 ```xml
 <application android:name="my.package.namespace.App" ... >...</application>
 ```
 
+Note: ```my```, ```package``` and ```namespace``` should match the your App ID. For example, if my app has ID: ```com.webniraj.app```, the Application Class  needs to be created in the ```platforms/android/src/com/webniraj/app``` folder. Any occurances of ```my.package.namespace``` in the above code need to be replaced with ```com.webniraj.app```.
+
 
 Compatibility
 -------------
-- Phonegap/Cordova > 3.0
-- iOS > 7 (on versions lower than 7, you will not receive push notification callbacks when the app is running in foreground)
+- Phonegap/Cordova > 5.0
+- iOS > 8
 - Android > 2.3
