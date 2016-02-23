@@ -2,6 +2,7 @@ package org.apache.cordova.core;
 
 import android.app.Application;
 import android.util.Log;
+import android.content.Context;
 
 import java.util.Set;
 import java.util.List;
@@ -39,16 +40,34 @@ public class ParsePlugin extends CordovaPlugin {
     private static JSONObject sLaunchNotification = null;
     
     public static void initializeParseWithApplication(Application app) {
+        Context context = app.getApplicationContext();
         String appId = getStringByKey(app, "parse_app_id");
         String clientKey = getStringByKey(app, "parse_client_key");
+        String server = getStringByKey(app, "parse_server");
         Parse.enableLocalDatastore(app);
-        Log.d(TAG, "Initializing with parse_app_id: " + appId + " and parse_client_key:" + clientKey);
-        Parse.initialize(app, appId, clientKey);
+        Log.d(TAG, "Initializing with parse_app_id: " + appId + " and parse_client_key:" + clientKey + " and server: " + server);
+        
+        if ( !server.equals("") ) {
+          Parse.initialize(new Parse.Configuration.Builder(context)
+              .applicationId( appId )
+              .clientKey( clientKey )
+              .server( server )
+              .build()
+          );
+        } else {
+          Parse.initialize(app, appId, clientKey);
+        }
+        
+        ParseInstallation.getCurrentInstallation().saveInBackground();
     }
     
     private static String getStringByKey(Application app, String key) {
         int resourceId = app.getResources().getIdentifier(key, "string", app.getPackageName());
-        return app.getString(resourceId);
+        if ( resourceId != 0 ) {
+          return app.getString(resourceId);
+        } else {
+          return "";
+        }
     }
     
     @Override
@@ -104,13 +123,10 @@ public class ParsePlugin extends CordovaPlugin {
         cordova.getThreadPool().execute(new Runnable() {
             public void run() {
                 try {
-                    String appId = args.getString(0);
-                    String clientKey = args.getString(1);
-                    Parse.initialize(cordova.getActivity(), appId, clientKey);
                     ParseInstallation.getCurrentInstallation().saveInBackground();
                     callbackContext.success();
-                } catch (JSONException e) {
-                    callbackContext.error("JSONException");
+                } catch ( Exception e ) {
+                    callbackContext.error("Exception");
                 }
             }
         });
