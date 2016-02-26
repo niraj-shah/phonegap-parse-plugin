@@ -47,7 +47,7 @@ public class ParsePlugin extends CordovaPlugin {
         Parse.enableLocalDatastore(app);
         Log.d(TAG, "Initializing with parse_app_id: " + appId + " and parse_client_key:" + clientKey + " and server: " + server);
         
-        if ( !server.equals("") ) {
+        if ( !server.equals("") && !server.equals("$SERVER") ) {
           Parse.initialize(new Parse.Configuration.Builder(context)
               .applicationId( appId )
               .clientKey( clientKey )
